@@ -18,6 +18,9 @@ Route::get('/system-config', [\App\Http\Controllers\SettingsController::class, '
 // Public Content Route
 Route::get('/content/{section}', [\App\Http\Controllers\SiteContentController::class, 'index']);
 
+// Public Team Routes
+Route::get('/teams', [\App\Http\Controllers\TeamController::class, 'index']);
+
 // Admin Routes (Authenticated)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
@@ -34,11 +37,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin Submission Management
     Route::get('/admin/submissions', [\App\Http\Controllers\AdminController::class, 'index']);
+    Route::get('/admin/documents', [\App\Http\Controllers\AdminController::class, 'documents']); 
     Route::get('/admin/reports', [\App\Http\Controllers\AdminController::class, 'reports']);
     Route::patch('/admin/submissions/{id}/status', [\App\Http\Controllers\AdminController::class, 'updateStatus']);
     Route::post('/admin/submissions/{id}/reply', [\App\Http\Controllers\AdminController::class, 'reply']);
     Route::patch('/admin/submissions/{id}/payment', [\App\Http\Controllers\AdminController::class, 'updatePayment']);
     Route::patch('/admin/submissions/{id}/return-details', [\App\Http\Controllers\AdminController::class, 'updateReturnDetails']);
+    Route::patch('/admin/submissions/{id}/missing-docs', [\App\Http\Controllers\AdminController::class, 'updateMissingDocs']);
 
     // Admin Content Management
     Route::post('/admin/content', [\App\Http\Controllers\SiteContentController::class, 'update']);
@@ -46,6 +51,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin Settings
     Route::get('/admin/settings', [\App\Http\Controllers\SettingsController::class, 'index']);
     Route::post('/admin/settings', [\App\Http\Controllers\SettingsController::class, 'update']);
+    
+    // Team Management
+    Route::post('/admin/teams', [\App\Http\Controllers\TeamController::class, 'store']);
+    Route::post('/admin/teams/{team}', [\App\Http\Controllers\TeamController::class, 'update']);
+    Route::delete('/admin/teams/{team}', [\App\Http\Controllers\TeamController::class, 'destroy']);
 
     // Admin Documents & Missing Flags
     Route::get('/admin/documents', [\App\Http\Controllers\AdminController::class, 'documents']);

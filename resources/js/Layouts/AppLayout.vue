@@ -5,8 +5,8 @@
             <div class="container mx-auto px-4 flex justify-between items-center">
                 <p>Welcome to VAT & Tax Consultancy Bangladesh</p>
                 <div class="flex items-center space-x-4">
-                    <span><i class="fas fa-phone mr-1"></i> +880 1712 345678</span>
-                    <span><i class="fas fa-envelope mr-1"></i> info@vatconsultant.com</span>
+                    <span><i class="fas fa-phone mr-1"></i> {{ sitePhone }}</span>
+                    <span><i class="fas fa-envelope mr-1"></i> {{ siteEmail }}</span>
                 </div>
             </div>
         </div>
@@ -15,8 +15,10 @@
         <header class="bg-white shadow-md sticky top-0 z-50">
             <div class="container mx-auto px-4 py-3 flex justify-between items-center">
                 <router-link to="/" class="flex items-center gap-2">
-                    <!-- Placeholder Logo -->
-                    <div class="w-10 h-10 bg-brand-blue rounded-full flex items-center justify-center text-white font-bold text-xl">V</div>
+                    <!-- Dynamic Logo -->
+                    <img v-if="siteLogo" :src="siteLogo" alt="Logo" class="h-10 w-auto">
+                    <div v-else class="w-10 h-10 bg-brand-blue rounded-full flex items-center justify-center text-white font-bold text-xl">V</div>
+                    
                     <div class="leading-tight">
                         <h1 class="text-xl font-bold text-brand-dark">VAT CONSULTANT</h1>
                         <span class="text-xs text-brand-red font-semibold tracking-wider">BANGLADESH</span>
@@ -91,13 +93,39 @@
 
         
         <!-- WhatsApp Floating Button -->
-        <a href="https://wa.me/8801712345678" target="_blank" class="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-4 shadow-lg hover:bg-green-600 transition z-50 animate-bounce-slow flex items-center gap-2">
+        <a :href="waLink" target="_blank" class="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-4 shadow-lg hover:bg-green-600 transition z-50 animate-bounce-slow flex items-center gap-2">
             <i class="fab fa-whatsapp text-3xl"></i>
             <span class="font-bold hidden md:inline">Chat with Us</span>
         </a>
     </div>
 </template>
 
-<style scoped>
-/* Scoped styles if needed */
-</style>
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const sitePhone = ref('+880 1712 345678');
+const siteEmail = ref('info@vatconsultant.com');
+const siteLogo = ref('');
+const waLink = ref('https://wa.me/8801712345678');
+
+const fetchConfig = async () => {
+    try {
+        const res = await axios.get('/api/system-config');
+        if (res.data.site_phone) sitePhone.value = res.data.site_phone;
+        if (res.data.site_email) siteEmail.value = res.data.site_email;
+        if (res.data.site_logo) siteLogo.value = res.data.site_logo;
+        
+        // Update WA Link
+        const waNumber = res.data.whatsapp_number || res.data.site_phone || '8801712345678';
+        const cleanPhone = waNumber.replace(/\D/g, '');
+        waLink.value = `https://wa.me/${cleanPhone}`;
+    } catch (e) {
+        console.error('Failed to load config');
+    }
+};
+
+onMounted(() => {
+    fetchConfig();
+});
+</script>

@@ -70,10 +70,27 @@
                     <input type="file" multiple @change="handleFileSelect" class="hidden" ref="fileInput">
                     <button type="button" @click="$refs.fileInput.click()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Select Files</button>
                     
-                    <div class="mt-4 space-y-2">
-                        <div v-for="(file, index) in form.documents" :key="index" class="flex items-center justify-between bg-gray-50 p-2 rounded">
-                            <span class="text-sm truncate">{{ file.name }}</span>
-                            <button type="button" @click="removeFile(index)" class="text-red-500 hover:text-red-700">&times;</button>
+                    <div class="mt-6 text-left space-y-3">
+                        <div v-for="(doc, index) in form.documents" :key="index" class="bg-gray-50 border p-3 rounded flex flex-col md:flex-row md:items-center gap-3 animate-fade-in">
+                            <div class="flex-grow flex items-center overflow-hidden">
+                                <i class="fas fa-file text-brand-blue mr-3 text-xl"></i>
+                                <div class="truncate">
+                                    <p class="text-sm font-bold text-gray-700 truncate">{{ doc.name }}</p>
+                                    <p class="text-xs text-gray-500">{{ (doc.file.size / 1024).toFixed(1) }} KB</p>
+                                </div>
+                            </div>
+                            
+                            <div class="w-full md:w-48">
+                                <select v-model="doc.type" class="w-full text-sm p-2 border rounded bg-white focus:ring-1 focus:ring-brand-blue outline-none cursor-pointer">
+                                    <option v-for="type in docTypes" :key="type.value" :value="type.value">
+                                        {{ type.label }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <button type="button" @click="removeFile(index)" class="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50 transition">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -128,8 +145,39 @@ const nextStep = () => {
     currentStep.value++;
 };
 
+const docTypes = [
+    { value: 'trade_license', label: 'Trade License' },
+    { value: 'tin_certificate', label: 'TIN Certificate' },
+    { value: 'bin_certificate', label: 'BIN Certificate' },
+    { value: 'nid_copy', label: 'NID Copy' },
+    { value: 'bank_statement', label: 'Bank Statement' },
+    { value: 'previous_return', label: 'Previous Return Copy' },
+    { value: 'import_export', label: 'Import/Export Document' },
+    { value: 'other', label: 'Other' }
+];
+
 const handleFileSelect = (event) => {
-    form.documents.push(...Array.from(event.target.files));
+    const files = Array.from(event.target.files);
+    files.forEach(file => {
+        form.documents.push({
+            file: file,
+            name: file.name,
+            type: 'other' // Default type
+        });
+    });
+    // Reset input
+    if (fileInput.value) fileInput.value.value = '';
+};
+
+const handleFileDrop = (event) => {
+    const files = Array.from(event.dataTransfer.files);
+    files.forEach(file => {
+        form.documents.push({
+            file: file,
+            name: file.name,
+            type: 'other'
+        });
+    });
 };
 
 const removeFile = (index) => {
@@ -142,7 +190,10 @@ const submitForm = async () => {
         const formData = new FormData();
         Object.keys(form).forEach(key => {
             if (key === 'documents') {
-                form.documents.forEach(file => formData.append('documents[]', file));
+                form.documents.forEach((doc, index) => {
+                    formData.append(`documents[${index}]`, doc.file);
+                    formData.append(`doc_types[${index}]`, doc.type);
+                });
             } else {
                 formData.append(key, form[key]);
             }

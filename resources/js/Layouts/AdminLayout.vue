@@ -26,6 +26,11 @@
                     <span class="ml-3" v-if="!collapsed">Website Content</span>
                 </router-link>
 
+                <router-link to="/admin/team" class="flex items-center px-4 py-3 rounded hover:bg-brand-blue hover:text-white transition text-gray-300" exact-active-class="bg-brand-blue text-white">
+                    <i class="fas fa-users text-lg w-6"></i>
+                    <span class="ml-3" v-if="!collapsed">Our Team</span>
+                </router-link>
+
                 <router-link to="/admin/work" class="flex items-center px-4 py-3 rounded hover:bg-brand-blue hover:text-white transition text-gray-300" exact-active-class="bg-brand-blue text-white">
                     <i class="fas fa-file-signature text-lg w-6"></i>
                     <span class="ml-3" v-if="!collapsed">Return Work</span>
@@ -88,6 +93,7 @@ const pageTitle = computed(() => {
     if (route.path.includes('/admin/settings')) return 'System Settings';
     if (route.path.includes('/admin/work')) return 'Return Processing';
     if (route.path.includes('/admin/documents')) return 'Document Repository';
+    if (route.path.includes('/admin/team')) return 'Manage Team';
     return 'Admin Dashboard';
 });
 </script>

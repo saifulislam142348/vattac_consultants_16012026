@@ -8,6 +8,7 @@ import About from '../pages/About.vue';
 import Services from '../pages/Services.vue';
 import Contact from '../pages/Contact.vue';
 import ClientProfile from '../pages/ClientProfile.vue';
+import AdminTeam from '../pages/admin/AdminTeam.vue'; // Import new page
 
 const routes = [
     {
@@ -72,6 +73,11 @@ const routes = [
     {
         path: '/admin/documents',
         component: () => import('../pages/admin/AdminDocuments.vue'),
+        meta: { requiresAuth: true, adminOnly: true }
+    },
+    {
+        path: '/admin/team',
+        component: AdminTeam,
         meta: { requiresAuth: true, adminOnly: true }
     },
 ];

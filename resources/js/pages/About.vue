@@ -6,8 +6,11 @@
                 
                 <div class="flex flex-col md:flex-row gap-12 items-center">
                     <div class="md:w-1/2">
-                        <!-- Placeholder for About Image -->
-                        <div class="w-full h-64 bg-gray-300 rounded-lg flex items-center justify-center text-gray-500">
+                        <!-- About Image -->
+                        <div v-if="aboutImage" class="w-full h-auto rounded-lg overflow-hidden shadow-lg">
+                            <img :src="aboutImage" alt="About Us" class="w-full h-full object-cover">
+                        </div>
+                        <div v-else class="w-full h-64 bg-gray-300 rounded-lg flex items-center justify-center text-gray-500">
                             Team Image Placeholder
                         </div>
                     </div>
@@ -31,14 +34,33 @@
                     </div>
                 </div>
 
-                <!-- Team Section (Optional) -->
-                <div class="mt-20">
+                <!-- Team Section -->
+                <div class="mt-20" v-if="teams.length > 0">
                     <h2 class="text-3xl font-bold font-heading text-brand-dark mb-8 text-center">Our Expert Team</h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div v-for="i in 3" :key="i" class="bg-white p-6 rounded shadow text-center">
-                            <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4"></div>
-                            <h4 class="font-bold text-lg">Consultant Name</h4>
-                            <p class="text-brand-blue text-sm">Senior Tax Advisor</p>
+                        <div v-for="member in teams" :key="member.id" class="bg-white p-6 rounded shadow text-center hover:shadow-lg transition">
+                            <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-2 border-brand-blue">
+                                <img v-if="member.image" :src="`/storage/${member.image}`" alt="Team" class="w-full h-full object-cover">
+                                <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                                    <i class="fas fa-user text-3xl"></i>
+                                </div>
+                            </div>
+                            <h4 class="font-bold text-lg text-gray-800">{{ member.name }}</h4>
+                            <p class="text-brand-blue text-sm font-semibold">{{ member.designation }}</p>
+                            <p class="text-gray-500 text-xs mt-1">{{ member.education }}</p> 
+                            
+                            <div class="mt-4 flex justify-center space-x-3">
+                                <a v-if="member.fb_link" :href="member.fb_link" target="_blank" class="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-full w-8 h-8 flex items-center justify-center transition">
+                                    <i class="fab fa-facebook-f text-xs"></i>
+                                </a>
+                                <a v-if="member.whatsapp" :href="`https://wa.me/${member.whatsapp.replace(/\D/g,'')}`" target="_blank" class="text-green-600 hover:text-green-800 bg-green-50 p-2 rounded-full w-8 h-8 flex items-center justify-center transition">
+                                    <i class="fab fa-whatsapp text-xs"></i>
+                                </a>
+                            </div>
+
+                            <div v-if="member.address" class="mt-3 text-xs text-gray-500 flex items-center justify-center gap-1">
+                                <i class="fas fa-map-marker-alt"></i> {{ member.address }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -48,5 +70,33 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import AppLayout from '../Layouts/AppLayout.vue';
+
+const teams = ref([]);
+const aboutImage = ref('');
+
+const fetchTeams = async () => {
+    try {
+        const res = await axios.get('/api/teams');
+        teams.value = res.data;
+    } catch (e) {
+        console.error('Failed to fetch teams');
+    }
+};
+
+const fetchConfig = async () => {
+    try {
+        const res = await axios.get('/api/system-config');
+        if (res.data.about_image) aboutImage.value = res.data.about_image;
+    } catch (e) {
+        console.error('Failed to fetch settings');
+    }
+};
+
+onMounted(() => {
+    fetchTeams();
+    fetchConfig();
+});
 </script>

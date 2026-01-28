@@ -35,6 +35,8 @@ class TaxSubmissionController extends Controller
             'message' => 'nullable|string',
             'documents' => 'array',
             'documents.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240', // 10MB max
+            'doc_types' => 'array',
+            'doc_types.*' => 'string|in:trade_license,tin_certificate,bin_certificate,nid_copy,bank_statement,previous_return,import_export,other',
         ]);
 
         $submission = TaxSubmission::create([
@@ -49,15 +51,22 @@ class TaxSubmissionController extends Controller
         ]);
 
         if ($request->hasFile('documents')) {
-            foreach ($request->file('documents') as $file) {
+            $files = $request->file('documents');
+            $types = $request->input('doc_types', []);
+
+            foreach ($files as $index => $file) {
                 // Determine disk based on environment, default to public for now
                 // Ideally this should be 'public' disk so it can be served
                 $path = $file->store('documents', 'public'); 
+                
+                // Get type from parallel array, or default to other if missing
+                $docType = isset($types[$index]) ? $types[$index] : 'other';
 
                 $submission->documents()->create([
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $path,
                     'file_type' => $file->getClientMimeType(),
+                    'doc_type' => $docType,
                 ]);
             }
         }
