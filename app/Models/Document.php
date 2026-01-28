@@ -11,6 +11,7 @@ class Document extends Model
         'file_name',
         'file_path',
         'file_type',
+        'doc_type',
     ];
 
     public function submission()

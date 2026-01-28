@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TaxSubmission;
+use App\Models\Document;
 use Illuminate\Http\Request;
 
 class TaxSubmissionController extends Controller
@@ -9,9 +11,14 @@ class TaxSubmissionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        return response()->json([
+            'data' => TaxSubmission::where('user_id', $request->user()->id)
+                ->with('documents')
+                ->latest()
+                ->get()
+        ]);
     }
 
     /**
@@ -27,10 +34,10 @@ class TaxSubmissionController extends Controller
             'total_income' => 'nullable|numeric',
             'message' => 'nullable|string',
             'documents' => 'array',
-            'documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max
+            'documents.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240', // 10MB max
         ]);
 
-        $submission = \App\Models\TaxSubmission::create([
+        $submission = TaxSubmission::create([
             'user_id' => $request->user('sanctum')?->id,
             'full_name' => $validated['full_name'],
             'phone_number' => $validated['phone_number'],
@@ -43,12 +50,14 @@ class TaxSubmissionController extends Controller
 
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $file) {
-                $path = $file->store('documents', 'local'); // Store in storage/app/documents
+                // Determine disk based on environment, default to public for now
+                // Ideally this should be 'public' disk so it can be served
+                $path = $file->store('documents', 'public'); 
 
                 $submission->documents()->create([
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $path,
-                    'file_type' => $file->getClientOriginalExtension(),
+                    'file_type' => $file->getClientMimeType(),
                 ]);
             }
         }

@@ -1,7 +1,10 @@
 <template>
     <AppLayout>
-        <HeroSection />
-        <ServicesSection />
+        <HeroSection 
+            :title="content.hero_title"
+            :subtitle="content.hero_subtitle" 
+        />
+        <ServicesSection :content="content" />
         
         <!-- About Summary -->
         <section class="py-16">
@@ -9,8 +12,7 @@
                 <div class="md:w-1/2">
                     <h2 class="text-3xl font-bold text-brand-dark font-heading mb-6">Why Choose Us?</h2>
                     <p class="text-gray-700 mb-4 leading-relaxed">
-                        We are a team of experienced tax consultants dedicated to simplifying your financial compliance. 
-                        With years of expertise in Bangladesh's tax laws, we ensure you pay exactly what you owe and not a penny more.
+                        {{ content.about_text || "We are a team of experienced tax consultants dedicated to simplifying your financial compliance. With years of expertise in Bangladesh's tax laws, we ensure you pay exactly what you owe and not a penny more." }}
                     </p>
                     <ul class="space-y-2 mb-6 text-gray-700">
                         <li class="flex items-center"><span class="text-brand-blue mr-2">✔</span> Expert Legal Advice</li>
@@ -39,7 +41,24 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import AppLayout from '../Layouts/AppLayout.vue';
 import HeroSection from '../components/Home/HeroSection.vue';
 import ServicesSection from '../components/Home/ServicesSection.vue';
+
+const content = ref({});
+
+const fetchContent = async () => {
+    try {
+        const res = await axios.get('/api/content/home');
+        content.value = res.data;
+    } catch (error) {
+        console.error('Failed to load content');
+    }
+};
+
+onMounted(() => {
+    fetchContent();
+});
 </script>

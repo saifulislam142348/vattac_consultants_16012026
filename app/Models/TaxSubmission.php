@@ -15,6 +15,22 @@ class TaxSubmission extends Model
         'total_income',
         'status',
         'message',
+        'admin_reply',
+        'is_phone_verified',
+        'service_charge',
+        'payment_status',
+        'payment_method',
+        'vat_month',
+        'return_data',
+        'calculation_notes',
+        'submission_date',
+        'nbr_ref_no',
+        'missing_documents',
+    ];
+
+    protected $casts = [
+        'missing_documents' => 'array',
+        'is_phone_verified' => 'boolean',
     ];
 
     public function user()

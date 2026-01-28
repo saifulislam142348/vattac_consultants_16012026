@@ -36,11 +36,13 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string', // Changed from email to login
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $login_type = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $user = User::where($login_type, $request->login)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
@@ -49,11 +51,15 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        
+        // Check if OTP is enabled
+        $otpEnabled = \App\Models\Setting::get('client_otp_enabled', 'true') === 'true';
 
         return response()->json([
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'should_verify_otp' => $otpEnabled && $user->role === 'client',
         ]);
     }
 

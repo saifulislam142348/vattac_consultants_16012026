@@ -23,7 +23,12 @@ export const useAuthStore = defineStore('auth', {
                 localStorage.setItem('token', this.token);
                 axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
 
-                router.push(this.user.role === 'admin' ? '/admin/dashboard' : '/portal');
+                // Check if we need to verify OTP
+                if (this.user.role === 'client' && response.data.should_verify_otp) {
+                    router.push('/otp-verify');
+                } else {
+                    router.push(this.user.role === 'admin' ? '/admin/dashboard' : '/portal');
+                }
             } catch (error) {
                 this.errors = error.response?.data?.errors || ['Login failed'];
             }

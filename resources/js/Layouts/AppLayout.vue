@@ -88,6 +88,13 @@
                 &copy; {{ new Date().getFullYear() }} VAT Consultant Bangladesh. All Rights Reserved.
             </div>
         </footer>
+
+        
+        <!-- WhatsApp Floating Button -->
+        <a href="https://wa.me/8801712345678" target="_blank" class="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-4 shadow-lg hover:bg-green-600 transition z-50 animate-bounce-slow flex items-center gap-2">
+            <i class="fab fa-whatsapp text-3xl"></i>
+            <span class="font-bold hidden md:inline">Chat with Us</span>
+        </a>
     </div>
 </template>
 
